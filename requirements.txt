@@ -1,0 +1,6 @@
+flask
+librosa
+sklearn
+werkzeug
+joblib
+statistics

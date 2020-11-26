@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MC</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Staatliches&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        *{
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body{
+            background-color: #8aacbe;
+        }
+        input{
+            padding: 8px 7px;
+            background-color: aliceblue;
+            width: 80%;
+            border: 1px solid black;
+        }
+        #wrapper{
+            margin:auto;
+            width:50%;
+            text-align: center;
+            padding-top: 10em;
+            align-items: center;
+            justify-content: center;
+        }
+        button{
+            padding:9px 12px 9px 12px;
+            margin-left: 10px;
+            color: white;
+            background-color: rgb(116, 189, 116);
+            border: 1px solid #000;
+        }
+        .show-data{
+            border: 1px solid black;   
+            font-size: 30px;
+            margin:0px 27px; 
+            font-family: 'Staatliches', cursive;
+            color: rgb(252, 87, 216);
+            background-color: aliceblue;
+            text-shadow:
+            1px 1px 0 #000,
+            -1px -1px 0 #000,  
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
+        }  
+        h1{
+            margin-top:1em;
+            text-align: center;
+            background: #8aacbe;
+            color: white;
+            font-size: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            font-family: 'Staatliches', cursive;
+            -webkit-text-fill-color: white; /* Will override color (regardless of order) */
+            -webkit-text-stroke-width: 1px;
+            -webkit-text-stroke-color: black;
+            text-shadow:
+            3px 3px 0 #000,
+            -1px -1px 0 #000,  
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
+
+        }
+        h2{
+            margin-top: 2em;
+            padding-left: 26px;
+            text-align: left;
+            color: white;
+            text-shadow:
+            -1px -1px 0 #000,  
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
+        }
+        p{
+            margin:20px;
+        }
+        #refresh{
+            margin-top:5em;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<script>
+    $(function(){   
+        $('#clicked').click(function() {
+        var form_data = new FormData($('#upload-file')[0]); 
+        $.ajax({
+            url: "/join",
+            type: "POST",
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false
+        }).done(function(response){      
+            response = response;
+            $(".show-data").empty();
+            //var aud = '<audio id="aud" controls autoplay></audio>';
+            //$(".show-data").append(aud);
+            //$("#aud").attr("src",response["filename"]);
+            console.log(response["output"]);
+            var out = '<p>'+response["output"]+'</p>';
+            $(".show-data").append(out);
+        });
+        });
+    });  
+</script>
+<body>
+        <h1>Music Classifier</h1>
+        <div id="wrapper">
+        <h2>Select a song</h2>
+        <form id="upload-file" method="post" enctype="multipart/form-data" action>
+        <input type="file" id="file" name="file">
+        <button id="clicked" type="button">Submit</button></form>
+        <h2>Genre of the song</h2>
+            <div class="show-data">
+                <p>Click submit to get the genre</p>
+        </div>
+        <button id="refresh" type="button" onclick="window.location.reload();"><i class="fa fa-refresh" style="font-size:24px"></i></button>
+    </div>
+</body>
+</html>
