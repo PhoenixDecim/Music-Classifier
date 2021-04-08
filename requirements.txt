@@ -4,3 +4,4 @@ sklearn
 werkzeug
 joblib
 statistics
+youtube-dl
