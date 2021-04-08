@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 import youtube_dl
 #from flask.ext.session import Session
 import os
-UPLOAD_FOLDER = "F:\\Music Classifier\\MC\\templates\\audio"
+UPLOAD_FOLDER = os.getcwd()+"/templates/audio"
 app = Flask(__name__)
 #sess = Session()
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -44,7 +44,7 @@ def home():
     return render_template('home.html')
 @app.route('/join',methods=['GET', 'POST'])
 def upload_file():
-    d="F:\\Music Classifier\\MC\\audio"
+    d=UPLOAD_FOLDER
     filesToRemove = [os.path.join(d,f) for f in os.listdir(d)]
     for f in filesToRemove:
         os.remove(f)
@@ -75,7 +75,7 @@ def upload_file():
                     print('Done downloading, now converting ...')
 
             ydl_opts = {
-                'outtmpl': 'F:/Music Classifier/MC/audio/song.%(ext)s',
+                'outtmpl': UPLOAD_FOLDER+'/song.%(ext)s',
                 'format': 'bestaudio/best',
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
@@ -87,7 +87,7 @@ def upload_file():
             }
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
-            audiopath = "F:/Music Classifier/MC/audio/song.aac"
+            audiopath = UPLOAD_FOLDER+"/song.aac"
         out = {"output": findgenre(audiopath)}
         return jsonify(out)
     #out = {"output": findgenre('F:\\Music Classifier\\MC\\audio\\song.mp3')}
