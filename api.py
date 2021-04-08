@@ -1,8 +1,10 @@
+from __future__ import unicode_literals
 from flask import Flask, request, render_template,jsonify,flash, redirect, url_for, session
 from werkzeug.utils import secure_filename
+import youtube_dl
 #from flask.ext.session import Session
 import os
-UPLOAD_FOLDER = "G:\\Music Classifier\\MC\\audio"
+UPLOAD_FOLDER = "F:\\Music Classifier\\MC\\templates\\audio"
 app = Flask(__name__)
 #sess = Session()
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -42,23 +44,54 @@ def home():
     return render_template('home.html')
 @app.route('/join',methods=['GET', 'POST'])
 def upload_file():
+    d="F:\\Music Classifier\\MC\\audio"
+    filesToRemove = [os.path.join(d,f) for f in os.listdir(d)]
+    for f in filesToRemove:
+        os.remove(f)
     if request.method == 'POST':
-        if 'file' not in request.files:
-            print('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        if file.filename == '':
-            print('No selected file')
-            return redirect(request.url)
-        print(file)
-        audiopath = os.path.join(app.config['UPLOAD_FOLDER'],secure_filename(file.filename))
-        file.save(audiopath)
-        out = {"output": findgenre(os.path.join(app.config['UPLOAD_FOLDER'],secure_filename(file.filename)))}
-        os.remove(audiopath)
-        return jsonify(out)
-    #out = {"output": findgenre('G:\\Music Classifier\\MC\\audio\\song.mp3')}
-    
+        print(request.form)
+        if(request.form['category']=='0'):
+            file = request.files['file']
+            if file.filename == '':
+                print('No selected file')
+                return redirect(request.url)
+            print(file)
+            ext=file.filename.rsplit('.', 1)[1].lower()
+            fil = 'song.'+ext
+            audiopath = os.path.join(app.config['UPLOAD_FOLDER'],fil)
+            file.save(audiopath)
+        elif(request.form['category']=='1'):
+            url=request.form['text']
+            class MyLogger(object):
+                def debug(self, msg):
+                    pass
+                def warning(self, msg):
+                    pass
+                def error(self, msg):
+                    print(msg)
 
+            def my_hook(d):
+                if d['status'] == 'finished':
+                    print('Done downloading, now converting ...')
+
+            ydl_opts = {
+                'outtmpl': 'F:/Music Classifier/MC/audio/song.%(ext)s',
+                'format': 'bestaudio/best',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'aac',
+                    'preferredquality': '256',
+                }],
+                'logger': MyLogger(),
+                'progress_hooks': [my_hook],
+            }
+            with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
+            audiopath = "F:/Music Classifier/MC/audio/song.aac"
+        out = {"output": findgenre(audiopath)}
+        return jsonify(out)
+    #out = {"output": findgenre('F:\\Music Classifier\\MC\\audio\\song.mp3')}
+    
 from flask import send_from_directory
 if __name__ == '__main__':
     app.secret_key = 'super secret key'

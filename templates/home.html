@@ -13,10 +13,17 @@
         body{
             background-color: #8aacbe;
         }
-        input{
-            padding: 8px 7px;
+        select{
             background-color: aliceblue;
-            width: 80%;
+            border: 1px solid black;
+            padding: 11.5px 7px;
+        }
+        #clicked{
+            padding: 11.5px 12px;
+        }
+        input{
+            background-color: aliceblue;
+            width: 71%;
             border: 1px solid black;
         }
         #wrapper{
@@ -37,9 +44,9 @@
         .show-data{
             border: 1px solid black;   
             font-size: 30px;
-            margin:0px 27px; 
+            margin:0px 1em; 
             font-family: 'Staatliches', cursive;
-            color: rgb(252, 87, 216);
+            color: rgb(235, 127, 211);
             background-color: aliceblue;
             text-shadow:
             1px 1px 0 #000,
@@ -88,11 +95,18 @@
             margin-top:5em;
             border-radius: 50%;
         }
+        audio{
+            margin-top:2em;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <script>
     $(function(){   
         $('#clicked').click(function() {
+        //var filename = $('input[type=file]').val().split('\\').pop();
+        $(document).find("i").removeClass("fa fa-refresh").addClass("fa fa-refresh fa-spin");
+        
         var form_data = new FormData($('#upload-file')[0]); 
         $.ajax({
             url: "/join",
@@ -104,23 +118,41 @@
         }).done(function(response){      
             response = response;
             $(".show-data").empty();
-            //var aud = '<audio id="aud" controls autoplay></audio>';
-            //$(".show-data").append(aud);
-            //$("#aud").attr("src",response["filename"]);
             console.log(response["output"]);
             var out = '<p>'+response["output"]+'</p>';
             $(".show-data").append(out);
+            $(document).find("i").removeClass("fa fa-refresh fa-spin").addClass("fa fa-refresh");
         });
         });
     });  
+    function yesnoCheck(that) {
+    if (that.value == "0") {
+        document.getElementById("file").style.display = "inline-block";
+        document.getElementById("text").style.display = "none";
+    } else {
+        document.getElementById("file").style.display = "none";
+        document.getElementById("text").style.display = "inline-block";
+    }
+}
 </script>
 <body>
         <h1>Music Classifier</h1>
         <div id="wrapper">
         <h2>Select a song</h2>
         <form id="upload-file" method="post" enctype="multipart/form-data" action>
-        <input type="file" id="file" name="file">
+            <select onchange="yesnoCheck(this);" id="category" name="category">
+                <option value="0" selected>Local File</option>
+                <option value="1">Youtube Link</option>
+            </select>
+        <input type="file" id="file" name="file" style="display: inline-block; padding: 8px 7px;">
+        <input type="text" id="text" name="text" style="display: none; padding: 11.5px 7px;">
         <button id="clicked" type="button">Submit</button></form>
+        <!--<audio
+            id="myPlayer"
+            preload="auto"
+            type="audio/mp3"
+            controls>   
+        </audio>  --> 
         <h2>Genre of the song</h2>
             <div class="show-data">
                 <p>Click submit to get the genre</p>
