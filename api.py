@@ -1,13 +1,19 @@
 from __future__ import unicode_literals
 from flask import Flask, request, render_template,jsonify,flash, redirect, url_for, session
 from werkzeug.utils import secure_filename
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
 import youtube_dl
 #from flask.ext.session import Session
 import os
-UPLOAD_FOLDER = os.getcwd()+"/templates/audio"
+UPLOAD_FOLDER = os.getcwd()+"\\templates\\audio"
 app = Flask(__name__)
 #sess = Session()
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+gauth = GoogleAuth()
+#gauth.LocalWebserverAuth()
+gauth.LoadCredentialsFile("mycreds.txt")
+drive = GoogleDrive(gauth)
 def findgenre(file):
     import numpy as np
     from sklearn.ensemble import RandomForestClassifier
@@ -44,6 +50,9 @@ def home():
     return render_template('home.html')
 @app.route('/join',methods=['GET', 'POST'])
 def upload_file():
+    file_list = drive.ListFile({'q':"'1amw0Ag2Lq2E2skfhDm7NV88Kgir63GpH'  in parents"}).GetList()
+    for x in file_list:
+        x.Delete()
     d=UPLOAD_FOLDER
     filesToRemove = [os.path.join(d,f) for f in os.listdir(d)]
     for f in filesToRemove:
@@ -60,6 +69,15 @@ def upload_file():
             fil = 'song.'+ext
             audiopath = os.path.join(app.config['UPLOAD_FOLDER'],fil)
             file.save(audiopath)
+            file1 = drive.CreateFile({'title': fil,'parents': [{'id': '1amw0Ag2Lq2E2skfhDm7NV88Kgir63GpH'}]})  # Create GoogleDriveFile instance with title 'Hello.txt'.
+            file1.SetContentFile(audiopath) # Set content of the file from given string.
+            file1.Upload()
+            file1.InsertPermission({
+                        'type': 'anyone',
+                        'value': 'anyone',
+                        'role': 'reader'})
+            driveurl=file1['id']
+            print(file1['id'])
         elif(request.form['category']=='1'):
             url=request.form['text']
             class MyLogger(object):
@@ -88,7 +106,17 @@ def upload_file():
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
             audiopath = UPLOAD_FOLDER+"/song.aac"
-        out = {"output": findgenre(audiopath)}
+            fil='song.aac'
+            file1 = drive.CreateFile({'title': fil,'parents': [{'id': '1amw0Ag2Lq2E2skfhDm7NV88Kgir63GpH'}]})
+            file1.SetContentFile(audiopath)
+            file1.Upload()
+            file1.InsertPermission({
+                        'type': 'anyone',
+                        'value': 'anyone',
+                        'role': 'reader'})
+            driveurl=file1['id']
+            print(file1['id'])
+        out = {"output": findgenre(audiopath),"path":driveurl}
         return jsonify(out)
     #out = {"output": findgenre('F:\\Music Classifier\\MC\\audio\\song.mp3')}
     

@@ -92,12 +92,46 @@
             margin:20px;
         }
         #refresh{
-            margin-top:5em;
+            margin-top:3em;
             border-radius: 50%;
         }
         audio{
             margin-top:2em;
             border-radius: 5px;
+        }
+        #volume-control{
+            -webkit-appearance: none;
+            width: 8em;
+            appearance: none;
+            background: aliceblue;
+            height: 8px;
+            outline: none;
+            border-radius: 5px;
+            margin-left:2em;
+            margin-bottom: 16px;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        #volume-control:hover {
+            opacity: 1; /* Fully shown on mouse-over */
+        }
+        #volume-control::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: rgb(116, 189, 116);
+            border: 1px solid rgb(50, 50, 50);
+            border-radius: 50%;
+            cursor: pointer; /* Cursor on hover */
+        }
+        #volume-control::-moz-range-thumb {
+            width: 18px; /* Set a specific slider handle width */
+            height: 18px; /* Slider handle height */
+            background: rgb(116, 189, 116); /* Green background */
+            border: 1px solid rgb(50, 50, 50);
+            border-radius: 50%;
+            cursor: pointer; /* Cursor on hover */
         }
     </style>
 </head>
@@ -106,8 +140,7 @@
         $('#clicked').click(function() {
         //var filename = $('input[type=file]').val().split('\\').pop();
         $(document).find("i").removeClass("fa fa-refresh").addClass("fa fa-refresh fa-spin");
-        
-        var form_data = new FormData($('#upload-file')[0]); 
+        var form_data = new FormData($('#upload-file')[0]);
         $.ajax({
             url: "/join",
             type: "POST",
@@ -118,10 +151,13 @@
         }).done(function(response){      
             response = response;
             $(".show-data").empty();
-            console.log(response["output"]);
             var out = '<p>'+response["output"]+'</p>';
             $(".show-data").append(out);
             $(document).find("i").removeClass("fa fa-refresh fa-spin").addClass("fa fa-refresh");
+            var date=new Date().getTime();
+            $('#audf')[0].src="http://docs.google.com/uc?export=open&id="+response["path"];
+            $('#audf')[0].load();
+            //$('#audf')[0].play();
         });
         });
     });  
@@ -133,6 +169,11 @@
         document.getElementById("file").style.display = "none";
         document.getElementById("text").style.display = "inline-block";
     }
+    audio = document.querySelector("#audf");
+    volume = document.querySelector("#volume-control");
+    volume.addEventListener("change", function(e) {
+        audio.volume = e.currentTarget.value / 100;
+    })
 }
 </script>
 <body>
@@ -147,12 +188,10 @@
         <input type="file" id="file" name="file" style="display: inline-block; padding: 8px 7px;">
         <input type="text" id="text" name="text" style="display: none; padding: 11.5px 7px;">
         <button id="clicked" type="button">Submit</button></form>
-        <!--<audio
-            id="myPlayer"
-            preload="auto"
-            type="audio/mp3"
-            controls>   
-        </audio>  --> 
+        <div class="myPlayer">
+        <audio id="audf" controls><source src=""></audio>
+        <input type="range" id="volume-control">
+        </div>
         <h2>Genre of the song</h2>
             <div class="show-data">
                 <p>Click submit to get the genre</p>
