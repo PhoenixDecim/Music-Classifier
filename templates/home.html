@@ -17,18 +17,20 @@
             background-color: aliceblue;
             border: 1px solid black;
             padding: 11.5px 7px;
+            margin-right: 5px;
         }
         #clicked{
-            padding: 11.5px 12px;
+            padding: 11.5px 20px;
+            margin-top: 5px;
         }
         input{
             background-color: aliceblue;
-            width: 71%;
+            width: 70%;
             border: 1px solid black;
         }
         #wrapper{
             margin:auto;
-            width:50%;
+            width:70%;
             text-align: center;
             padding-top: 10em;
             align-items: center;
@@ -36,7 +38,7 @@
         }
         button{
             padding:9px 12px 9px 12px;
-            margin-left: 10px;
+            margin-left: 5px;
             color: white;
             background-color: rgb(116, 189, 116);
             border: 1px solid #000;
@@ -46,7 +48,7 @@
             font-size: 30px;
             margin:0px 1em; 
             font-family: 'Staatliches', cursive;
-            color: rgb(235, 127, 211);
+            color: rgb(233, 146, 214);
             background-color: aliceblue;
             text-shadow:
             1px 1px 0 #000,
@@ -78,7 +80,7 @@
 
         }
         h2{
-            margin-top: 2em;
+            margin-top: 1em;
             padding-left: 26px;
             text-align: left;
             color: white;
@@ -95,14 +97,10 @@
             margin-top:3em;
             border-radius: 50%;
         }
-        audio{
-            margin-top:2em;
-            border-radius: 5px;
-        }
         #volume-control{
             -webkit-appearance: none;
-            width: 8em;
             appearance: none;
+            width:15em;
             background: aliceblue;
             height: 8px;
             outline: none;
@@ -114,6 +112,19 @@
         }
         #volume-control:hover {
             opacity: 1; /* Fully shown on mouse-over */
+        }
+        audio{
+            margin-top: 2em;
+            border-radius: 4px;
+        }
+        .caption{
+            color: white;
+        }
+        .myplayer{
+            text-align: center;
+        }
+        input[type=range]{
+            margin-top: 2em;
         }
         #volume-control::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -157,6 +168,8 @@
             var date=new Date().getTime();
             $('#audf')[0].src="http://docs.google.com/uc?export=open&id="+response["path"];
             $('#audf')[0].load();
+            $('#bass')[0].src="http://docs.google.com/uc?export=open&id="+response["bass"];
+            $('#bass')[0].load();
             //$('#audf')[0].play();
         });
         });
@@ -170,16 +183,20 @@
         document.getElementById("text").style.display = "inline-block";
     }
     audio = document.querySelector("#audf");
+    bass = document.querySelector("#bass");
     volume = document.querySelector("#volume-control");
     volume.addEventListener("change", function(e) {
         audio.volume = e.currentTarget.value / 100;
+        bass.volume = e.currentTarget.value / 100;
     })
 }
 </script>
 <body>
         <h1>Music Classifier</h1>
         <div id="wrapper">
+        
         <h2>Select a song</h2>
+        <div class="inputfile">
         <form id="upload-file" method="post" enctype="multipart/form-data" action>
             <select onchange="yesnoCheck(this);" id="category" name="category">
                 <option value="0" selected>Local File</option>
@@ -188,9 +205,13 @@
         <input type="file" id="file" name="file" style="display: inline-block; padding: 8px 7px;">
         <input type="text" id="text" name="text" style="display: none; padding: 11.5px 7px;">
         <button id="clicked" type="button">Submit</button></form>
-        <div class="myPlayer">
+        <div class="myplayer">
         <audio id="audf" controls><source src=""></audio>
+        <figcaption class="caption">Original</figcaption>
+        <audio id="bass" controls><source src=""></audio>
+        <figcaption class="caption">Without Bass</figcaption>
         <input type="range" id="volume-control">
+        </div>
         </div>
         <h2>Genre of the song</h2>
             <div class="show-data">

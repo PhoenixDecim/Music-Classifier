@@ -3,7 +3,15 @@ from flask import Flask, request, render_template,jsonify,flash, redirect, url_f
 from werkzeug.utils import secure_filename
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
+import keras
 import youtube_dl
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from joblib import dump, load
+import librosa
+import soundfile as sf
+from sklearn.preprocessing import StandardScaler
+import statistics
 #from flask.ext.session import Session
 import os
 UPLOAD_FOLDER = os.getcwd()+"\\templates\\audio"
@@ -15,12 +23,6 @@ gauth = GoogleAuth()
 gauth.LoadCredentialsFile("mycreds.txt")
 drive = GoogleDrive(gauth)
 def findgenre(file):
-    import numpy as np
-    from sklearn.ensemble import RandomForestClassifier
-    from joblib import dump, load
-    import librosa
-    from sklearn.preprocessing import StandardScaler
-    import statistics
     rf = load('rfmodel.joblib')
     genrel = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz','metal', 'pop', 'reggae', 'rock']
     y, sr = librosa.load(file,mono=True)
@@ -45,6 +47,30 @@ def findgenre(file):
     sn = np.asarray(n,dtype = float)
     genre = genrel[statistics.mode(rf.predict(sn))]
     return genre.upper()
+def bass(path):
+    cnn=keras.models.load_model("bass1d_model.h5",custom_objects={'LeakyReLU': keras.layers.advanced_activations.LeakyReLU})
+    x, sr = librosa.load(path)
+    specm = librosa.stft(x,n_fft=2048)
+    frames=specm.shape[1]
+    newspec=specm.reshape(frames,1025,1)
+    basswo=cnn.predict(newspec,batch_size=12)
+    basswo=basswo.reshape(1025,frames)
+    bi=(np.less(basswo,np.percentile(basswo,75)))
+    sovox=specm*bi
+    svox = librosa.istft(sovox)
+    n = len(svox)
+    n_fft = 2048
+    svox = librosa.util.fix_length(svox, n + n_fft // 2)
+    ap='F:/Music-Classifier/templates/audio/basswo.wav'
+    sf.write(ap, svox, 22050, subtype='PCM_16')
+    file2 = drive.CreateFile({'title': 'basswo.wav','parents': [{'id': '1amw0Ag2Lq2E2skfhDm7NV88Kgir63GpH'}]})  # Create GoogleDriveFile instance with title 'Hello.txt'.
+    file2.SetContentFile(ap) # Set content of the file from given string.
+    file2.Upload()
+    file2.InsertPermission({
+                'type': 'anyone',
+                'value': 'anyone',
+                'role': 'reader'})
+    return(file2['id'])
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -116,7 +142,8 @@ def upload_file():
                         'role': 'reader'})
             driveurl=file1['id']
             print(file1['id'])
-        out = {"output": findgenre(audiopath),"path":driveurl}
+        basswo=bass(audiopath)
+        out = {"output": findgenre(audiopath),"path":driveurl,"bass":basswo}
         return jsonify(out)
     #out = {"output": findgenre('F:\\Music Classifier\\MC\\audio\\song.mp3')}
     
