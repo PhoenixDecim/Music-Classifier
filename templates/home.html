@@ -13,14 +13,20 @@
         body{
             background-color: #8aacbe;
         }
-        select{
+        #category{
             background-color: aliceblue;
             border: 1px solid black;
-            padding: 11.5px 7px;
+            padding: 11px 7px;
+            margin-right: 5px;
+        }
+        #extract{
+            background-color: aliceblue;
+            border: 1px solid black;
+            padding: 11px 0px;
             margin-right: 5px;
         }
         #clicked{
-            padding: 11.5px 20px;
+            padding: 11px 20px;
             margin-top: 5px;
         }
         input{
@@ -94,24 +100,8 @@
             margin:20px;
         }
         #refresh{
-            margin-top:3em;
+            margin-top:1em;
             border-radius: 50%;
-        }
-        #volume-control{
-            -webkit-appearance: none;
-            appearance: none;
-            width:15em;
-            background: aliceblue;
-            height: 8px;
-            outline: none;
-            border-radius: 5px;
-            margin-left:2em;
-            margin-bottom: 16px;
-            opacity: 0.7;
-            transition: opacity .2s;
-        }
-        #volume-control:hover {
-            opacity: 1; /* Fully shown on mouse-over */
         }
         audio{
             margin-top: 2em;
@@ -122,27 +112,6 @@
         }
         .myplayer{
             text-align: center;
-        }
-        input[type=range]{
-            margin-top: 2em;
-        }
-        #volume-control::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            background: rgb(116, 189, 116);
-            border: 1px solid rgb(50, 50, 50);
-            border-radius: 50%;
-            cursor: pointer; /* Cursor on hover */
-        }
-        #volume-control::-moz-range-thumb {
-            width: 18px; /* Set a specific slider handle width */
-            height: 18px; /* Slider handle height */
-            background: rgb(116, 189, 116); /* Green background */
-            border: 1px solid rgb(50, 50, 50);
-            border-radius: 50%;
-            cursor: pointer; /* Cursor on hover */
         }
     </style>
 </head>
@@ -189,10 +158,10 @@
         audio.volume = e.currentTarget.value / 100;
         bass.volume = e.currentTarget.value / 100;
     })
-}
+    }
 </script>
 <body>
-        <h1>Music Classifier</h1>
+        <h1>Music Classifier and Isolator</h1>
         <div id="wrapper">
         
         <h2>Select a song</h2>
@@ -202,6 +171,12 @@
                 <option value="0" selected>Local File</option>
                 <option value="1">Youtube Link</option>
             </select>
+            <select id="extract" name="extract">
+                <option value="bass" selected>Bass</option>
+                <option value="acc">Accompaniment</option>
+                <option value="drums">Drums</option>
+                <option value="vox">Vocals</option>
+            </select>
         <input type="file" id="file" name="file" style="display: inline-block; padding: 8px 7px;">
         <input type="text" id="text" name="text" style="display: none; padding: 11.5px 7px;">
         <button id="clicked" type="button">Submit</button></form>
@@ -209,8 +184,7 @@
         <audio id="audf" controls><source src=""></audio>
         <figcaption class="caption">Original</figcaption>
         <audio id="bass" controls><source src=""></audio>
-        <figcaption class="caption">Without Bass</figcaption>
-        <input type="range" id="volume-control">
+        <figcaption class="caption">Extracted</figcaption>
         </div>
         </div>
         <h2>Genre of the song</h2>

@@ -5,3 +5,6 @@ werkzeug
 joblib
 statistics
 youtube-dl
+pydrive
+keras
+tensorflow

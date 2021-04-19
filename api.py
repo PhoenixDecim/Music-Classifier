@@ -47,21 +47,31 @@ def findgenre(file):
     sn = np.asarray(n,dtype = float)
     genre = genrel[statistics.mode(rf.predict(sn))]
     return genre.upper()
-def bass(path):
-    cnn=keras.models.load_model("bass1d_model.h5",custom_objects={'LeakyReLU': keras.layers.advanced_activations.LeakyReLU})
+def target(path,type):
+    mod = type+'.h5'
+    cnn=keras.models.load_model(mod,custom_objects={'LeakyReLU': keras.layers.advanced_activations.LeakyReLU})
     x, sr = librosa.load(path)
     specm = librosa.stft(x,n_fft=2048)
     frames=specm.shape[1]
     newspec=specm.reshape(frames,1025,1)
     basswo=cnn.predict(newspec,batch_size=12)
     basswo=basswo.reshape(1025,frames)
-    bi=(np.less(basswo,np.percentile(basswo,75)))
+    per=50
+    if(type=="bass"):
+        per=50
+    elif(type=="drums"):
+        per=10
+    elif(type=="acc"):
+        per=50
+    elif(type=="vox"):
+        per=10
+    bi=(np.less(basswo,np.percentile(basswo,per)))
     sovox=specm*bi
     svox = librosa.istft(sovox)
     n = len(svox)
     n_fft = 2048
     svox = librosa.util.fix_length(svox, n + n_fft // 2)
-    ap='F:/Music-Classifier/templates/audio/basswo.wav'
+    ap=os.getcwd()+'\\templates\\audio\\basswo.wav'
     sf.write(ap, svox, 22050, subtype='PCM_16')
     file2 = drive.CreateFile({'title': 'basswo.wav','parents': [{'id': '1amw0Ag2Lq2E2skfhDm7NV88Kgir63GpH'}]})  # Create GoogleDriveFile instance with title 'Hello.txt'.
     file2.SetContentFile(ap) # Set content of the file from given string.
@@ -142,7 +152,7 @@ def upload_file():
                         'role': 'reader'})
             driveurl=file1['id']
             print(file1['id'])
-        basswo=bass(audiopath)
+        basswo=target(audiopath,request.form['extract'])
         out = {"output": findgenre(audiopath),"path":driveurl,"bass":basswo}
         return jsonify(out)
     #out = {"output": findgenre('F:\\Music Classifier\\MC\\audio\\song.mp3')}
